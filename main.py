@@ -1,17 +1,15 @@
 import pygame
 import sys
-import subprocess
-
+from room1 import Room1
 
 pygame.init()
-
 
 window_width, window_height = 894, 700
 window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("Cineverse")
 
-background_image = pygame.image.load('cineverse.png')
-background_image = pygame.transform.scale(background_image, (window_width, window_height))
+background_image1 = pygame.image.load('cineverse.png')
+background_image = pygame.transform.scale(background_image1, (window_width, window_height))
 
 font_path = 'InknutAntiqua-Regular.ttf'
 font_size = 14
@@ -25,6 +23,8 @@ prompt_position = (320, window_height - 200)
 clock = pygame.time.Clock()
 cursor_visible = True
 cursor_timer = 0
+
+current_room = None
 
 running = True
 while running:
@@ -42,29 +42,32 @@ while running:
                     input_text = input_text[:-1]
                 elif event.key == pygame.K_RETURN:
                     if input_text == "1":
-                        subprocess.run(["python", "room1.py"])
+                        current_room = Room1(window)
                     input_text = ''
                 else:
                     input_text += event.unicode
 
-    window.blit(background_image, (0, 0))
+    window.fill((0, 0, 0))
 
-    prompt_surface = font.render(prompt_text, True, (255, 255, 255))
-    window.blit(prompt_surface, prompt_position)
-
-    pygame.draw.rect(window, (255, 255, 255), input_box, 2)
-
-    text_surface = font.render(input_text, True, (255, 255, 255))
-    text_rect = text_surface.get_rect(center=input_box.center)  
-    window.blit(text_surface, text_rect)
-
-    cursor_timer += clock.tick(30) / 1000
-    if cursor_timer >= 0.5:
-        cursor_timer = 0
-        cursor_visible = not cursor_visible
-    if input_active and cursor_visible:
-        cursor_rect = pygame.Rect(text_rect.right + 2, text_rect.top, 2, text_rect.height)
-        pygame.draw.rect(window, (255, 255, 255), cursor_rect)
+    if current_room:
+        current_room.handle_event(event)
+        current_room.render()
+    else:
+        window.blit(background_image, (0, 0))
+        prompt_surface = font.render(prompt_text, True, (255, 255, 255))
+        window.blit(prompt_surface, prompt_position)
+        pygame.draw.rect(window, (255, 255, 255), input_box, 2)
+        text_surface = font.render(input_text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(input_box.centerx, input_box.centery))
+        window.blit(text_surface, text_rect)
+        cursor_timer += clock.tick(30) / 1000
+        if cursor_timer >= 0.5:
+            cursor_timer = 0
+            cursor_visible = not cursor_visible
+        if input_active and cursor_visible:
+            cursor_rect = pygame.Rect(text_rect.right + 2, text_rect.top, 2, text_rect.height)
+            pygame.draw.rect(window, (255, 255, 255), cursor_rect)
+            print(f'Drawing cursor at {cursor_rect}')
 
     pygame.display.flip()
 
