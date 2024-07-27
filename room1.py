@@ -1,11 +1,11 @@
 import pygame
 import sys
-import subprocess
+
 class Room1:
     def __init__(self, window):
         self.window = window
         self.window_width, self.window_height = window.get_size()
-        self.background_image1 = pygame.image.load('matrixpill.png')  
+        self.background_image1 = pygame.image.load('matrixpill.png')
         self.background_image = pygame.transform.scale(self.background_image1, (self.window_width, self.window_height))
         self.font_path = 'ZenDots-Regular.ttf'
         self.font_size = 14
@@ -20,8 +20,11 @@ class Room1:
         self.prompt_position = (300, self.window_height - 180)
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.input_box.collidepoint(event.pos):  
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if self.input_box.collidepoint(event.pos):
                 self.input_active = True
             else:
                 self.input_active = False
@@ -31,28 +34,45 @@ class Room1:
                     self.input_text = self.input_text[:-1]
                 elif event.key == pygame.K_RETURN:
                     if self.input_text.lower() == "red pill":
-                        subprocess.run(["python", "riddle.py"])
-                    else:
-                        pygame.quit()
-                        sys.exit()
+                        # Add code to handle "red pill" selection
+                        print("Red pill selected")
+                    elif self.input_text.lower() == "blue pill":
+                        # Add code to handle "blue pill" selection
+                        print("Blue pill selected")
                     self.input_text = ''
                 else:
-                    self.input_text += event.unicode  
+                    self.input_text += event.unicode
 
     def render(self):
-        self.window.fill((0, 0, 0)) 
+        self.window.fill((0, 0, 0))
         self.window.blit(self.background_image, (0, 0))
         prompt_surface = self.font.render(self.prompt_text, True, (255, 255, 255))
         self.window.blit(prompt_surface, self.prompt_position)
         pygame.draw.rect(self.window, (255, 255, 255), self.input_box, 2)
         text_surface = self.font.render(self.input_text, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(self.input_box.centerx, self.input_box.centery))  
+        text_rect = text_surface.get_rect(center=(self.input_box.centerx, self.input_box.centery))
         self.window.blit(text_surface, text_rect)
-        self.cursor_timer += self.clock.tick(30) / 1000  
+        self.cursor_timer += self.clock.tick(30) / 1000
         if self.cursor_timer >= 0.5:
             self.cursor_timer = 0
             self.cursor_visible = not self.cursor_visible
         if self.input_active and self.cursor_visible:
             cursor_rect = pygame.Rect(text_rect.right + 2, text_rect.top, 2, text_rect.height)
             pygame.draw.rect(self.window, (255, 255, 255), cursor_rect)
-            print(f'Drawing cursor at {cursor_rect}')  
+
+# Code to test Room1 if run directly
+if __name__ == "__main__":
+    pygame.init()
+    window = pygame.display.set_mode((894, 700))
+    pygame.display.set_caption("Room 1 - The Matrix")
+    room1 = Room1(window)
+    
+    running = True
+    while running:
+        for event in pygame.event.get():
+            room1.handle_event(event)
+        room1.render()
+        pygame.display.flip()
+    
+    pygame.quit()
+    sys.exit()
